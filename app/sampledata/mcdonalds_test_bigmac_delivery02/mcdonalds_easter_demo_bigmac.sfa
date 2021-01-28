@@ -1,0 +1,74 @@
+{
+  animations: [
+    {
+      clips: [
+        {
+          name: 'CINEMA_4D_Main',
+        },
+      ],
+      path: 'sampledata/mcdonalds_test_bigmac_delivery02/mcdonalds_easter_demo_bigmac.fbx',
+    },
+  ],
+  materials: [
+    {
+      name: 'Mat',
+      parameters: [
+        {
+          baseColor: [
+            1,
+            1,
+            1,
+            1,
+          ],
+        },
+        {
+          baseColorMap: 'GMA_GC_Kalender_Ei_BigMac_18_39L_id (0-00-00-00)',
+        },
+        {
+          normalMap: null,
+        },
+        {
+          interpolatedColor: null,
+        },
+        {
+          metallic: 0,
+        },
+        {
+          metallicMap: null,
+        },
+        {
+          roughness: 1,
+        },
+        {
+          roughnessMap: null,
+        },
+        {
+          opacity: null,
+        },
+      ],
+      source: 'build/sceneform_sdk/default_materials/fbx_material.sfm',
+    },
+  ],
+  model: {
+    attributes: [
+      'Position',
+      'TexCoord',
+      'Orientation',
+      'BoneIndices',
+      'BoneWeights',
+    ],
+    collision: {},
+    file: 'sampledata/mcdonalds_test_bigmac_delivery02/mcdonalds_easter_demo_bigmac.fbx',
+    name: 'mcdonalds_easter_demo_bigmac',
+    recenter: 'root',
+    scale: 0.54374,
+  },
+  samplers: [
+    {
+      file: 'sampledata/mcdonalds_test_bigmac_delivery02/mcdonalds_easter_demo_bigmac.fbm/GMA_GC_Kalender_Ei_BigMac_18_39L_id (0-00-00-00).png',
+      name: 'GMA_GC_Kalender_Ei_BigMac_18_39L_id (0-00-00-00)',
+      pipeline_name: 'mcdonalds_easter_demo_bigmac.fbm/GMA_GC_Kalender_Ei_BigMac_18_39L_id (0-00-00-00).png',
+    },
+  ],
+  version: '0.54:2',
+}

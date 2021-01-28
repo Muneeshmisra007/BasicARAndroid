@@ -91,10 +91,7 @@ sceneform.asset('sampledata/skelton/58_Movement_LODa_r01.fbx',
 
 
 
-
-
-
-sceneform.asset('sampledata/mcdonalds_test_mcflurry_delivery01/mcdonalds_easter_demo_mcfluryy.gltf',
+sceneform.asset('sampledata/mcdonalds_test_bigmac_delivery02/mcdonalds_easter_demo_bigmac.fbx',
         'default',
-        'sampledata/mcdonalds_test_mcflurry_delivery01/mcdonalds_easter_demo_mcfluryy.sfa',
-        'src/main/assets/mcdonalds_easter_demo_mcfluryy')
+        'sampledata/mcdonalds_test_bigmac_delivery02/mcdonalds_easter_demo_bigmac.sfa',
+        'src/main/assets/mcdonalds_easter_demo_bigmac')

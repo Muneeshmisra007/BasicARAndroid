@@ -2,43 +2,63 @@ package com.mcdar.a3dassests
 
 import android.app.ActivityManager
 import android.content.Context
+import android.content.pm.PackageManager
 import android.graphics.Point
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.CountDownTimer
+import android.os.Handler
 import android.view.View
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import com.google.ar.core.*
 import kotlinx.android.synthetic.main.mcd_ar_activity.*
 import com.mcdar.a3dassests.helper.ARHelper
+import java.text.DecimalFormat
 
 
-class MainActivity : AppCompatActivity(), McdARListener {
+class MainActivity : AppCompatActivity(), McdARListener, ObjectClickListener {
 
-    // private lateinit var arFragment: ArFragment
-
+    private lateinit var session: Session
     private var isTracking: Boolean = false
     private var isHitting: Boolean = false
     private var isAdded = false
-    private val FILE_NAME = "mcdonalds_easter_demo_mcfluryy.sfb"
-    //    private val URL_MODEL = "https://mcdmobileappdev.blob.core.windows.net/img/arAndroid/cangrejo.fbx"
-    private val URL_MODEL =
-        "https://mcdmobileappdev.blob.core.windows.net/img/arAndroid/mungiltf/model.gltf"
-
+    private val TIMER_FORMAT = "%s : %s"
+    private var countDownTimer: CountDownTimer? = null
+    private val FILE_NAME = "mcdonalds_easter_demo_bigmac.sfb"
+    private val REQ_CODE = 450065;
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.mcd_ar_activity)
-
+        checkAndLoadARScreen()
     }
-
 
     override fun onResume() {
         super.onResume()
-        isARCoreAvailable()
+
     }
 
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        when (requestCode) {
+            REQ_CODE -> {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    loadARView()
+                } else {
+                    startNonARScreen()
+                }
+            }
+            else -> {
+                super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+            }
+        }
+    }
 
     // Updates the tracking state
     @RequiresApi(Build.VERSION_CODES.N)
@@ -55,7 +75,9 @@ class MainActivity : AppCompatActivity(), McdARListener {
                 }
             }
         }
+
     }
+
 
     // Performs frame.HitTest and returns if a hit is detected
     private fun updateHitTest(arFragment: McdARFragment): Boolean {
@@ -105,83 +127,124 @@ class MainActivity : AppCompatActivity(), McdARListener {
             for (hit in hits) {
                 val trackable = hit.trackable
                 if (trackable is Plane && trackable.isPoseInPolygon(hit.hitPose)) {
-                    //placeObject(arFragment, hit.createAnchor(), model)
-                    //ARHelper.addTexturedNode(arFragment, hit.createAnchor(), model)
-                    ARHelper.add3dModelWithTexture(arFragment, hit.createAnchor(), model, R.drawable.pommes, this, false)
+                    ARHelper.add3dModelWithTexture(
+                        arFragment,
+                        hit.createAnchor(),
+                        model,
+                        R.drawable.golden_texture,
+                        this,
+                        false,
+                        this
+                    )
                     break
                 }
             }
         }
     }
 
-
-
-
-
-
-
     private fun startARScreen() {
+        if (ARHelper.checkCameraPermission(this)) {
+            loadARView()
+        } else {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                requestPermissions(arrayOf(android.Manifest.permission.CAMERA), REQ_CODE)
+            }
+        }
+    }
+
+    private fun loadARView() {
         val fragment: McdARFragment = McdARFragment.newInstance()
         fragment.listener = this
         supportFragmentManager.beginTransaction().replace(getContainerId(), fragment)
             .commitAllowingStateLoss()
+        showTimer(30)
     }
 
     private fun startNonARScreen() {
-        val fragment: McdNonARFragment = McdNonARFragment.newInstance()
-        supportFragmentManager.beginTransaction().replace(getContainerId(), fragment)
-            .commitAllowingStateLoss()
     }
 
-    public fun getContainerId(): Int {
+    fun getContainerId(): Int {
         return R.id.containerId;
     }
 
     @RequiresApi(Build.VERSION_CODES.N)
-    override fun onArReady(arFragment: McdARFragment) {
+    override fun onArReady(fragment: McdARFragment) {
 
 //         Adds a listener to the ARSceneView
 //         Called before processing each frame
-        arFragment.planeDiscoveryController.hide()
-        arFragment.planeDiscoveryController.setInstructionView(null)
-        arFragment.arSceneView.planeRenderer.isVisible = false
-        arFragment.arSceneView.scene.addOnUpdateListener { frameTime ->
-            arFragment.onUpdate(frameTime)
-            onUpdate(arFragment)
+        fragment.planeDiscoveryController.hide()
+        fragment.planeDiscoveryController.setInstructionView(null)
+        fragment.arSceneView.planeRenderer.isVisible = false
+        fragment.arSceneView.scene.addOnUpdateListener { frameTime ->
+            fragment.onUpdate(frameTime)
+            onUpdate(fragment)
         }
-
-
-
-        // Set the onclick lister for our button
-        // Change this string to point to the .sfb file of your choice :)
-        floatingActionButton.setOnClickListener { addObject(Uri.parse(FILE_NAME), arFragment) }
-
-//        if (!isAdded) {
-//            addObject(Uri.parse(FILE_NAME), arFragment)
-//            isAdded = true;
-//        }
-
     }
 
-    private fun isARCoreAvailable() {
+    private fun checkAndLoadARScreen() {
+
+        val openGlVersionString: String =
+            (getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager)
+                .deviceConfigurationInfo
+                .glEsVersion
+
+        if (openGlVersionString.toDouble() < 3.0 || android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
+            startNonARScreen()
+            return
+        }
         val availability = ArCoreApk.getInstance().checkAvailability(this)
-        if (availability.isTransient) {
-            isARCoreAvailable()
+        when {
+            availability.isTransient -> {
+                Handler().postDelayed(Runnable { checkAndLoadARScreen() }, 200)
+            }
+            availability.isSupported -> {
+                startARScreen()
+            }
+            else -> {
+                //start no ar screen
+                startNonARScreen()
+            }
+        }
+    }
+
+    private fun showTimer(seconds: Int) {
+        if (seconds == 0) {
+            return
         }
 
-        val openGlVersionString: String = (getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager)
-            .deviceConfigurationInfo
-            .glEsVersion
-        if (openGlVersionString.toDouble() >= 3.0) {
+        countDownTimer = object : CountDownTimer((seconds * 1000).toLong(), 1000) {
 
-            startNonARScreen()
-        }
+            override fun onFinish() {
 
-        if (availability.isSupported) {
-            startARScreen()
-        } else {
-            //start no ar screen
-            startNonARScreen()
+                //TODO start non ar flow screen
+            }
+
+            override fun onTick(millisUntilFinished: Long) {
+                val secondsLeft = millisUntilFinished / 1000
+                var decimalFormat = DecimalFormat("00")
+
+                timer.text =
+                    String.format(
+                        TIMER_FORMAT,
+                        decimalFormat.format(secondsLeft / 60),
+                        decimalFormat.format(secondsLeft % 60).toString()
+                    )
+            }
         }
+        countDownTimer?.start()
+    }
+
+    override fun onClick() {
+        print("clicked...")
+        Toast.makeText(this, "clicked...", Toast.LENGTH_SHORT)
+    }
+
+    fun arObjectFound() {
+//        viewModel.foundARObject()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        countDownTimer?.cancel()
     }
 }

@@ -25,17 +25,38 @@ android:layout_height="match_parent"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toTopOf="parent" />
 
-<com.google.android.material.floatingactionbutton.FloatingActionButton
-    android:id="@+id/floatingActionButton"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_marginBottom="8dp"
-    android:layout_marginEnd="8dp"
-    android:visibility="gone"
-    android:layout_marginStart="8dp"
-    app:layout_constraintBottom_toBottomOf="@+id/containerId"
-    app:layout_constraintEnd_toEndOf="parent"
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="80dp"
+    android:orientation="horizontal"
+    android:id="@+id/header"
+    android:gravity="end|center_vertical"
+    app:layout_constraintTop_toTopOf="parent"
     app:layout_constraintStart_toStartOf="parent"
-    />
+    app:layout_constraintEnd_toEndOf="parent"
+    android:background="@color/colorAccent"
+    >
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textStyle="bold"
+        android:textSize="24sp"
+        android:layout_marginEnd="30dp"
+        tools:text="01 : 30"
+        android:textColor="#ffffff"
+        android:id="@+id/timer"/>
+
+</LinearLayout>
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="120dp"
+        android:adjustViewBounds="true"
+        android:layout_marginTop="30dp"
+        android:layout_marginStart="30dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:src="@mipmap/ic_launcher"
+        />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -8,10 +8,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import com.google.ar.core.Anchor
-import com.google.ar.core.HitResult
-import com.google.ar.core.Plane
-import com.google.ar.core.TrackingState
+import com.google.ar.core.*
 import com.google.ar.sceneform.AnchorNode
 import com.google.ar.sceneform.HitTestResult
 import com.google.ar.sceneform.Node
@@ -52,7 +49,15 @@ class McdARFragment: ArFragment() {
         }
     }
 
+    override fun getSessionConfiguration(session: Session?): Config {
+        val config = Config(session)
+        config.planeFindingMode = Config.PlaneFindingMode.HORIZONTAL_AND_VERTICAL
+        return config
+    }
+
 }
+
+
 
 
 
