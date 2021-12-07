@@ -29,16 +29,16 @@ class MainActivity : AppCompatActivity(), McdARListener, ObjectClickListener {
     private var countDownTimer: CountDownTimer? = null
     private val FILE_NAME = "mcdonalds_easter_demo_bigmac.sfb"
     private val REQ_CODE = 450065;
+    private lateinit var arTexture : ARTexture
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.mcd_ar_activity)
         checkAndLoadARScreen()
-    }
-
-    override fun onResume() {
-        super.onResume()
-
+        arTexture = intent.getSerializableExtra("arTexture") as ARTexture
+        goBack.setOnClickListener {
+            finish()
+        }
     }
 
     override fun onRequestPermissionsResult(
@@ -131,10 +131,11 @@ class MainActivity : AppCompatActivity(), McdARListener, ObjectClickListener {
                         arFragment,
                         hit.createAnchor(),
                         model,
-                        R.drawable.golden_texture,
+                        R.drawable.happymealtexture,
                         this,
                         false,
-                        this
+                        this,
+                        arTexture
                     )
                     break
                 }
@@ -239,6 +240,14 @@ class MainActivity : AppCompatActivity(), McdARListener, ObjectClickListener {
         Toast.makeText(this, "clicked...", Toast.LENGTH_SHORT)
     }
 
+    override fun onObjectAdded() {
+        print("666666666666")
+    }
+
+    override fun hideObject() {
+        print("666666666666P")
+    }
+
     fun arObjectFound() {
 //        viewModel.foundARObject()
     }
@@ -247,4 +256,6 @@ class MainActivity : AppCompatActivity(), McdARListener, ObjectClickListener {
         super.onDestroy()
         countDownTimer?.cancel()
     }
+
+
 }

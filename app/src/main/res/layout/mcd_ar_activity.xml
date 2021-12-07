@@ -36,12 +36,20 @@ android:layout_height="match_parent"
     app:layout_constraintEnd_toEndOf="parent"
     android:background="@color/colorAccent"
     >
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@android:color/white"
+        android:background="@android:color/transparent"
+        android:id="@+id/goBack"
+        android:text="Go BACK"/>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textStyle="bold"
         android:textSize="24sp"
+        android:visibility="gone"
         android:layout_marginEnd="30dp"
         tools:text="01 : 30"
         android:textColor="#ffffff"
@@ -53,6 +61,7 @@ android:layout_height="match_parent"
         android:layout_height="120dp"
         android:adjustViewBounds="true"
         android:layout_marginTop="30dp"
+        android:visibility="gone"
         android:layout_marginStart="30dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"

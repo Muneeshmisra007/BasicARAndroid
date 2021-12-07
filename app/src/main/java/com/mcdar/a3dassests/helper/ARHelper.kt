@@ -9,11 +9,9 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import com.google.ar.core.Anchor
-import com.google.ar.sceneform.AnchorNode
-import com.google.ar.sceneform.HitTestResult
-import com.google.ar.sceneform.Node
-import com.google.ar.sceneform.SkeletonNode
+import com.google.ar.sceneform.*
 import com.google.ar.sceneform.animation.ModelAnimator
+import com.google.ar.sceneform.assets.RenderableSource
 import com.google.ar.sceneform.math.Vector3
 import com.google.ar.sceneform.rendering.Material
 import com.google.ar.sceneform.rendering.MaterialFactory
@@ -21,6 +19,7 @@ import com.google.ar.sceneform.rendering.ModelRenderable
 import com.google.ar.sceneform.rendering.Texture
 import com.google.ar.sceneform.ux.ArFragment
 import com.google.ar.sceneform.ux.TransformableNode
+import com.mcdar.a3dassests.ARTexture
 import com.mcdar.a3dassests.McdARFragment
 import com.mcdar.a3dassests.ObjectClickListener
 
@@ -31,12 +30,12 @@ class ARHelper {
 
         fun add3dModelWithTexture(
             arFragment: McdARFragment, anchor: Anchor, model: Uri, res: Int,
-            context: Context, applyAnimation: Boolean, listener: ObjectClickListener
-        ) {
+            context: Context, applyAnimation: Boolean, listener: ObjectClickListener,
+        arTexture: ARTexture) {
 
 
           //  Texture.builder().setSource(BitmapFactory.decodeResource(context.resources, res))
-            Texture.builder().setSource(context, res)
+            Texture.builder().setSource(context, arTexture.texture)
 //                .setSampler(Texture.Sampler.builder()
 //                    .setMagFilter(Texture.Sampler.MagFilter.LINEAR)
 //                    .setMinFilter(Texture.Sampler.MinFilter.LINEAR_MIPMAP_LINEAR)
@@ -55,7 +54,7 @@ class ARHelper {
 //                                    listener
 //                                )
                             } else {
-                                addTexturedNode(arFragment, anchor, model, it, context, listener)
+                                addTexturedNode(arFragment, anchor, model, it, context, listener, arTexture)
                                 //addTransferableNode(arFragment,anchor,model, context,it)
                             }
                         }
@@ -75,7 +74,8 @@ class ARHelper {
             model: Uri,
             texture: Material,
             context: Context,
-            listener: ObjectClickListener
+            listener: ObjectClickListener,
+            arTexture: ARTexture
         ) {
 
             ModelRenderable.builder()
@@ -92,7 +92,7 @@ class ARHelper {
                     println("$texture + rrrrrrr")
                     val anchorNode = AnchorNode(anchor)
                     val skeletonNode = SkeletonNode()
-                    skeletonNode.localScale = Vector3(0.3f, 0.3f, 0.3f)
+                    skeletonNode.localScale = Vector3(arTexture.size, arTexture.size, arTexture.size)
                     skeletonNode.setParent(anchorNode)
                     skeletonNode.renderable = it
                     skeletonNode.setOnTapListener { hitTestResult: HitTestResult, motionEvent: MotionEvent ->
@@ -101,10 +101,34 @@ class ARHelper {
                     anchorNode.setOnTapListener { hitTestResult: HitTestResult, motionEvent: MotionEvent ->
                         listener.onClick()
                     }
+                    texture.setFloat("metallic", arTexture.metallicity)
+                    texture.setFloat("roughness", arTexture.roughness)
+                    texture.setFloat("interpolatedColor", arTexture.interpolar)
+
+                    //texture.setFloat("metallicMap", 0.9f)
                     it.material = texture
                     //anchorNode.localRotation = Quaternion.multiply(anchorNode.localRotation, Quaternion(Vector3.up(),180f))
                     // skeletonNode.setLocalRotation(Quaternion.axisAngle(Vector3(1f, 0f, 0f), 90f))
                     fragment.arSceneView.scene.addChild(anchorNode)
+                    anchorNode.addLifecycleListener(object: Node.LifecycleListener{
+                        override fun onDeactivated(p0: Node?) {
+                            println("onDeactivated11111${p0.toString()}")
+                        }
+
+                        override fun onActivated(p0: Node?) {
+                            println("onActivated11111${p0.toString()}")
+                        }
+
+                        override fun onUpdated(p0: Node?, p1: FrameTime?) {
+                            //println("onUpdated11111${p0.toString()}")
+
+
+
+                        }
+
+                    })
+                    listener.onObjectAdded()
+                    RenderableSource.RecenterMode.CENTER
 //                val count: Int = it.animationDataCount
 //                print("lookAtAnim1" + count)
 //                if (count > 0 && (modelAnimator == null || !modelAnimator!!.isRunning)) {
@@ -250,5 +274,29 @@ class ARHelper {
         }
 
 
+
     }
+
+
+}
+fun com.google.ar.sceneform.Camera.isWorldPositionVisible(worldPosition: Vector3): Boolean {
+    val var2 = com.google.ar.sceneform.math.Matrix()
+    com.google.ar.sceneform.math.Matrix.multiply(projectionMatrix, viewMatrix, var2)
+    val var5: Float = worldPosition.x
+    val var6: Float = worldPosition.y
+    val var7: Float = worldPosition.z
+    val var8 = var5 * var2.data[3] + var6 * var2.data[7] + var7 * var2.data[11] + 1.0f * var2.data[15]
+    if (var8 < 0f) {
+        return false
+    }
+    val var9 = Vector3()
+    var9.x = var5 * var2.data[0] + var6 * var2.data[4] + var7 * var2.data[8] + 1.0f * var2.data[12]
+    var9.x = var9.x / var8
+    if (var9.x !in -1f..1f) {
+        return false
+    }
+
+    var9.y = var5 * var2.data[1] + var6 * var2.data[5] + var7 * var2.data[9] + 1.0f * var2.data[13]
+    var9.y = var9.y / var8
+    return var9.y in -1f..1f
 }

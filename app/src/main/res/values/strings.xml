@@ -1,4 +1,12 @@
 <resources>
-    <string name="app_name">3Dassests</string>
+    <string name="app_name">ArTest</string>
     <string name="action_settings">Settings</string>
+    <integer-array name="textures">
+        <item>@drawable/bigmactexture</item>
+        <item>@drawable/mcflurrytexture</item>
+        <item>@drawable/happymealtexture</item>
+        <item>@drawable/nuggetstexture</item>
+        <item>@drawable/pommestexture</item>
+        <item>@drawable/goldentexture</item>
+    </integer-array>
 </resources>
